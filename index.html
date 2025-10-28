@@ -35,7 +35,7 @@
 
       if (usuarios[user] && usuarios[user].clave === pass) {
         localStorage.setItem("usuario", user);
-        window.location.href = "tienda.html";
+        window.location.href = "panel.html";
       } else {
         document.getElementById('mensaje').textContent = "Usuario o contraseña incorrectos.";
       }
