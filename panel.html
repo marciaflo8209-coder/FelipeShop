@@ -1,128 +1,383 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel - FelipeStore</title>
-  <style>
-    body {
-      background-color: #0d1117;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-    header {
-      background-color: #161b22;
-      padding: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    h1 {
-      color: #58a6ff;
-      font-size: 1.6em;
-    }
-    .user-info {
-      text-align: right;
-    }
-    .saldo {
-      font-size: 1.2em;
-      margin-bottom: 5px;
-    }
-    .logout-btn {
-      background-color: #f85149;
-      border: none;
-      color: white;
-      padding: 8px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.9em;
-    }
-    .productos {
-      margin: 20px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-    }
-    .producto {
-      background-color: #21262d;
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: 0 0 10px rgba(255,255,255,0.05);
-    }
-    .producto img {
-      width: 100%;
-      border-radius: 8px;
-    }
-    .producto h3 {
-      color: #58a6ff;
-      margin: 10px 0 5px;
-    }
-    .producto p {
-      font-size: 0.9em;
-      color: #ccc;
-    }
-    .precio {
-      font-weight: bold;
-      color: #39d353;
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>FelipeStore — Panel</title>
+<style>
+  /* --- Neón oscuro --- */
+  :root{
+    --bg:#05060a;
+    --panel:#0b0f18;
+    --neon-blue:#00e6ff;
+    --neon-red:#ff2d6d;
+    --muted:#9aa3b2;
+    --card:#0f1116;
+  }
+  *{box-sizing:border-box;font-family:Inter,system-ui,Arial;}
+  body{margin:0;min-height:100vh;background:
+    radial-gradient(600px 300px at 10% 10%, rgba(0,230,255,0.02), transparent),
+    radial-gradient(500px 300px at 90% 90%, rgba(255,45,109,0.02), transparent),
+    var(--bg); color:#e6eef8;padding:12px;}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border-radius:12px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    box-shadow:0 8px 40px rgba(0,0,0,0.6);backdrop-filter:blur(6px)}
+  .brand{font-weight:800;font-size:20px;color:var(--neon-red);text-shadow:0 0 18px rgba(255,45,109,0.22)}
+  .controls{display:flex;gap:10px;align-items:center}
+  .badge{background:linear-gradient(90deg,var(--neon-red),#ff5a87);padding:10px 14px;border-radius:999px;color:#fff;font-weight:700;box-shadow:0 6px 20px rgba(255,45,109,0.12)}
+  .user-name{color:var(--neon-blue);font-weight:700;text-shadow:0 0 8px rgba(0,230,255,0.12)}
+  .btn{padding:10px 14px;border-radius:999px;border:0;font-weight:700;cursor:pointer}
+  .btn-blue{background:linear-gradient(90deg,var(--neon-blue),#30f0ff);color:#021017}
+  .btn-red{background:linear-gradient(90deg,var(--neon-red),#ff5a87);color:#fff}
+
+  main{max-width:1100px;margin:18px auto}
+  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:16px;border-radius:12px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.03)}
+  .top-info{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .saldo{font-weight:800;color:var(--neon-red);text-shadow:0 0 12px rgba(255,45,109,0.12)}
+  .small{color:var(--muted);font-size:13px}
+
+  /* productos grid */
+  .productos{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:12px}
+  .prod{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;gap:10px}
+  .prod img{width:100%;height:130px;object-fit:cover;border-radius:8px}
+  .prod h4{margin:0;color:var(--neon-blue)}
+  .price{font-weight:800;color:var(--neon-red)}
+  .prod .actions{display:flex;gap:8px;margin-top:auto}
+  .buy-btn{flex:1;padding:10px;border-radius:10px;border:0;font-weight:700}
+  .buy-ok{background:linear-gradient(90deg,#7affc2,#00e68a);color:#021017}
+  .buy-no{background:linear-gradient(90deg,var(--neon-red),#ff5a87);color:#fff}
+
+  /* owner form */
+  .owner-area{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}
+  .row{display:flex;gap:8px}
+  input,select,textarea{background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;padding:10px;border-radius:10px}
+  label{font-size:13px;color:var(--muted)}
+
+  /* list admin */
+  .admin-list{max-height:220px;overflow:auto;margin-top:8px}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:8px;border-bottom:1px dashed rgba(255,255,255,0.03);font-size:13px}
+  .muted{color:var(--muted)}
+
+  @media (max-width:720px){
+    header{flex-direction:column;align-items:flex-start}
+    .row{flex-direction:column}
+  }
+
+  /* welcome overlay */
+  .welcome-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:60;backdrop-filter:blur(4px)}
+  .welcome-box{padding:28px 30px;border-radius:16px;background:linear-gradient(180deg, rgba(0,0,0,0.6), rgba(255,255,255,0.02));text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.7)}
+  .welcome-box h2{color:var(--neon-blue);font-size:22px;text-shadow:0 0 18px rgba(0,230,255,0.2)}
+</style>
 </head>
 <body>
-  <header>
-    <h1>FelipeStore 💰</h1>
-    <div class="user-info">
-      <div class="saldo">Saldo: <span id="saldo">$0.00</span></div>
-      <div id="usuario"></div>
-      <button class="logout-btn" onclick="logout()">Salir</button>
+<header>
+  <div class="brand">FelipeStore 💸</div>
+  <div class="controls">
+    <div class="badge" id="saldo-badge">$0.00</div>
+    <div class="user-name" id="user-name">Usuario</div>
+    <button class="btn btn-blue" id="btn-home">INICIO</button>
+    <button class="btn btn-red" id="btn-logout">SALIR</button>
+  </div>
+</header>
+
+<main>
+  <section class="panel">
+    <div class="top-info">
+      <div>
+        <div class="small">Bienvenido</div>
+        <div style="font-weight:800;font-size:18px" id="welcome-name">Usuario</div>
+      </div>
+      <div style="text-align:right">
+        <div class="small">Saldo disponible</div>
+        <div class="saldo" id="top-saldo">$0.00</div>
+      </div>
     </div>
-  </header>
 
-  <h2>🛍️ Productos disponibles</h2>
+    <!-- filtro -->
+    <div style="margin-top:12px;border-radius:12px;padding:12px;border:1px solid rgba(255,10,20,0.03);">
+      <div style="font-weight:700;color:var(--neon-blue)">CATEGORÍA</div>
+      <select id="filter-category" style="width:100%;margin-top:8px"></select>
 
-  <div class="productos" id="productos"></div>
+      <div style="margin-top:12px;font-weight:700;color:var(--neon-blue)">BUSCAR PRODUCTO</div>
+      <input id="filter-q" placeholder="¿Qué estás buscando?" style="width:100%;margin-top:8px">
+      <div style="margin-top:12px;display:flex;gap:10px">
+        <button class="btn btn-blue" onclick="applyFilters()">🔍 FILTRAR</button>
+        <button class="btn btn-red" onclick="resetFilters()">🔄 LIMPIAR</button>
+      </div>
+    </div>
 
-  <script>
-    // Verificar sesión
-    const usuario = localStorage.getItem("usuarioActivo");
-    const saldo = localStorage.getItem("saldoUsuario") || "0.00";
+  </section>
 
-    if (!usuario) {
-      window.location.href = "index.html";
-    }
+  <!-- productos -->
+  <section class="panel">
+    <h3 style="margin:0 0 8px">🛍️ Productos disponibles</h3>
+    <div id="productos" class="productos"></div>
+  </section>
 
-    document.getElementById("usuario").innerText = usuario;
-    document.getElementById("saldo").innerText = `$${saldo}`;
+  <!-- owner area -->
+  <section id="owner-panel" class="panel" style="display:none">
+    <h3 style="margin-top:0">⚙️ Panel del Owner</h3>
 
-    function logout() {
-      localStorage.removeItem("usuarioActivo");
-      window.location.href = "index.html";
-    }
+    <div class="owner-area">
+      <div>
+        <div style="font-weight:700">➕ Añadir producto</div>
+        <div class="row" style="margin-top:8px">
+          <input id="prod-name" placeholder="Nombre del producto">
+          <input id="prod-price" placeholder="Precio $" type="number" step="0.01">
+        </div>
+        <div class="row" style="margin-top:8px">
+          <input id="prod-img" placeholder="URL de la imagen">
+          <input id="prod-cat" placeholder="Categoría">
+        </div>
+        <div style="margin-top:8px">
+          <textarea id="prod-desc" placeholder="Descripción (opcional)" rows="2" style="width:100%"></textarea>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button class="btn btn-blue" onclick="addProduct()">Añadir producto</button>
+          <button class="btn btn-red" onclick="clearProdForm()">Limpiar</button>
+        </div>
+      </div>
 
-    // Lista de productos
-    const productos = [
-      { nombre: "Tarjeta Steam", descripcion: "Tarjeta regalo de Steam de $10", precio: 10, img: "https://via.placeholder.com/200x120?text=Steam" },
-      { nombre: "Netflix Premium", descripcion: "Cuenta 1 mes premium", precio: 6, img: "https://via.placeholder.com/200x120?text=Netflix" },
-      { nombre: "Spotify Premium", descripcion: "Cuenta 1 mes premium", precio: 5, img: "https://via.placeholder.com/200x120?text=Spotify" },
-      { nombre: "Google Play", descripcion: "Tarjeta de $15", precio: 15, img: "https://via.placeholder.com/200x120?text=Google+Play" }
-    ];
+      <div>
+        <div style="font-weight:700">📋 Productos (editar / eliminar)</div>
+        <div class="admin-list">
+          <table id="admin-products">
+            <thead><tr><th>Imagen</th><th>Nombre</th><th>Precio</th><th>Acción</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
 
-    const contenedor = document.getElementById("productos");
+<!-- Welcome overlay (se mostrará tras login) -->
+<div id="welcome-overlay" class="welcome-overlay" style="display:none">
+  <div class="welcome-box">
+    <h2>✨ Bienvenido a FelipeStore 💸</h2>
+  </div>
+</div>
 
-    productos.forEach(p => {
-      const div = document.createElement("div");
-      div.className = "producto";
-      div.innerHTML = `
-        <img src="${p.img}" alt="${p.nombre}">
-        <h3>${p.nombre}</h3>
-        <p>${p.descripcion}</p>
-        <p class="precio">$${p.precio.toFixed(2)}</p>
-      `;
-      contenedor.appendChild(div);
-    });
-  </script>
+<script>
+/* ---------- Estado inicial: carga desde localStorage ---------- */
+const LS_USERS = 'felipestore_users_v1';
+const LS_PRODUCTS = 'felipestore_products_v1';
+const LS_CURRENT = 'felipestore_current_v1';
+
+// carga usuarios (si no hay, crea owner por defecto)
+let users = JSON.parse(localStorage.getItem(LS_USERS)) || {
+  "FelipeOficial": { pass: "Felipe2013", saldo: 10.00, role: "owner" }
+};
+let products = JSON.parse(localStorage.getItem(LS_PRODUCTS)) || [
+  // ejemplos - puedes borrarlos desde el panel owner
+  { id: id(), name: "Wolf 30 Day", price: 7.00, img: "https://via.placeholder.com/420x240?text=Wolf+30", desc:"Acceso 30 días", category:"Hacks", available:true },
+  { id: id(), name: "VIP Premium", price: 15.00, img: "https://via.placeholder.com/420x240?text=VIP", desc:"Paquete VIP", category:"Premium", available:true }
+];
+let current = JSON.parse(localStorage.getItem(LS_CURRENT)) || null;
+
+/* ---------- Helper ---------- */
+function id(){ return Math.random().toString(36).slice(2,9) }
+function saveUsers(){ localStorage.setItem(LS_USERS, JSON.stringify(users)) }
+function saveProducts(){ localStorage.setItem(LS_PRODUCTS, JSON.stringify(products)) }
+function saveCurrent(){ localStorage.setItem(LS_CURRENT, JSON.stringify(current)) }
+function formatMoney(v){ return '$' + Number(v).toFixed(2) }
+
+/* ---------- Comprobar sesión ---------- */
+if(!current){
+  // si no hay sesión, redirigir al login (index.html)
+  // pero si quieres ver panel sin login para pruebas, comenta la siguiente línea
+  window.location.href = "index.html";
+} else {
+  initPage();
+}
+
+/* ---------- Inicializar UI ---------- */
+function initPage(){
+  // mostrar nombre y saldo
+  document.getElementById('user-name').innerText = current.username;
+  document.getElementById('welcome-name').innerText = current.username;
+  document.getElementById('top-saldo').innerText = formatMoney(current.saldo || 0);
+  document.getElementById('saldo-badge').innerText = formatMoney(current.saldo || 0);
+
+  // botones
+  document.getElementById('btn-home').addEventListener('click', ()=> window.scrollTo({top:0,behavior:'smooth'}));
+  document.getElementById('btn-logout').addEventListener('click', ()=> { localStorage.removeItem(LS_CURRENT); window.location.href='index.html'; });
+
+  // si es owner, mostrar area admin
+  if(users[current.username] && users[current.username].role === 'owner'){
+    document.getElementById('owner-panel').style.display = 'block';
+  }
+
+  populateCategoryFilter();
+  renderProducts();
+  renderAdminProducts();
+}
+
+/* ---------- Filtrado ---------- */
+function populateCategoryFilter(){
+  const sel = document.getElementById('filter-category');
+  sel.innerHTML = '';
+  const cats = Array.from(new Set(products.map(p=>p.category || 'General')));
+  const optAll = document.createElement('option'); optAll.value=''; optAll.textContent='Todas las categorías';
+  sel.appendChild(optAll);
+  cats.forEach(c=>{
+    const o = document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o);
+  });
+}
+
+function applyFilters(){
+  renderProducts();
+}
+function resetFilters(){
+  document.getElementById('filter-category').value='';
+  document.getElementById('filter-q').value='';
+  renderProducts();
+}
+
+/* ---------- Render productos para usuarios ---------- */
+function renderProducts(){
+  const wrap = document.getElementById('productos');
+  wrap.innerHTML = '';
+  const q = (document.getElementById('filter-q').value || '').toLowerCase();
+  const cat = document.getElementById('filter-category').value;
+  const list = products.filter(p=>p.available && ( (cat? p.category===cat : true) && (p.name.toLowerCase().includes(q) || (p.desc||'').toLowerCase().includes(q)) ));
+  if(list.length===0){ wrap.innerHTML = '<div class="small muted">No hay productos disponibles</div>'; return; }
+  list.forEach(p=>{
+    const d = document.createElement('div'); d.className='prod';
+    d.innerHTML = `
+      <img src="${escape(p.img)}" alt="${escape(p.name)}" onerror="this.src='https://via.placeholder.com/420x240?text=No+image'">
+      <h4>${escape(p.name)}</h4>
+      <div class="small muted">${escape(p.desc||'')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="price">${formatMoney(p.price)}</div>
+      </div>
+      <div class="actions">
+        <button class="buy-btn ${canBuy(p)?'buy-ok':'buy-no'}" onclick="buyProduct('${p.id}')">${canBuy(p)?'Comprar':'Saldo insuficiente'}</button>
+        <button class="btn btn-blue" onclick="showInfo('${p.id}')">Info</button>
+      </div>
+    `;
+    wrap.appendChild(d);
+  });
+}
+
+/* ---------- Comprar ---------- */
+function canBuy(p){
+  return (current.saldo || 0) >= p.price;
+}
+function buyProduct(pid){
+  const p = products.find(x=>x.id===pid);
+  if(!p) return alert('Producto no encontrado');
+  if(!canBuy(p)) return alert('Saldo insuficiente');
+  current.saldo = Math.round((current.saldo - p.price) * 100)/100;
+  users[current.username].saldo = current.saldo;
+  saveUsers(); saveCurrent();
+  document.getElementById('top-saldo').innerText = formatMoney(current.saldo);
+  document.getElementById('saldo-badge').innerText = formatMoney(current.saldo);
+  alert('Compra exitosa ✅');
+  renderProducts();
+  renderAdminProducts();
+}
+
+/* ---------- Info producto ---------- */
+function showInfo(pid){
+  const p = products.find(x=>x.id===pid);
+  if(!p) return alert('Producto no encontrado');
+  alert(`${p.name}\n\n${p.desc||''}\n\nPrecio: ${formatMoney(p.price)}\nCategoría: ${p.category||'General'}`);
+}
+
+/* ---------- Owner: añadir / editar / eliminar productos ---------- */
+function addProduct(){
+  const name = document.getElementById('prod-name').value.trim();
+  const price = parseFloat(document.getElementById('prod-price').value);
+  const img = document.getElementById('prod-img').value.trim();
+  const cat = document.getElementById('prod-cat').value.trim() || 'General';
+  const desc = document.getElementById('prod-desc').value.trim();
+  if(!name || isNaN(price)){ return alert('Nombre y precio válidos'); }
+  const p = { id:id(), name, price: Math.round(price*100)/100, img: img||'https://via.placeholder.com/420x240?text=No+image', desc, category:cat, available:true };
+  products.unshift(p);
+  saveProducts();
+  populateCategoryFilter();
+  renderProducts();
+  renderAdminProducts();
+  clearProdForm();
+  alert('Producto añadido ✅');
+}
+
+function clearProdForm(){
+  document.getElementById('prod-name').value='';
+  document.getElementById('prod-price').value='';
+  document.getElementById('prod-img').value='';
+  document.getElementById('prod-cat').value='';
+  document.getElementById('prod-desc').value='';
+}
+
+function renderAdminProducts(){
+  const tbody = document.querySelector('#admin-products tbody');
+  if(!tbody) return;
+  tbody.innerHTML='';
+  products.forEach(p=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="width:70px"><img src="${escape(p.img)}" style="width:60px;height:40px;object-fit:cover;border-radius:6px" onerror="this.src='https://via.placeholder.com/60x40?text=No'"></td>
+      <td>${escape(p.name)}</td>
+      <td>${formatMoney(p.price)}</td>
+      <td>
+        <button class="btn btn-blue" onclick="editProduct('${p.id}')">Editar</button>
+        <button class="btn btn-red" onclick="deleteProduct('${p.id}')">Eliminar</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* editar */
+function editProduct(pid){
+  const p = products.find(x=>x.id===pid);
+  if(!p) return alert('No encontrado');
+  // rellenar formulario
+  document.getElementById('prod-name').value = p.name;
+  document.getElementById('prod-price').value = p.price;
+  document.getElementById('prod-img').value = p.img;
+  document.getElementById('prod-cat').value = p.category;
+  document.getElementById('prod-desc').value = p.desc;
+  // eliminar el antiguo (al guardar se añade de nuevo)
+  products = products.filter(x=>x.id !== pid);
+  saveProducts();
+  renderAdminProducts();
+  renderProducts();
+}
+
+/* eliminar */
+function deleteProduct(pid){
+  if(!confirm('Eliminar producto?')) return;
+  products = products.filter(x=>x.id !== pid);
+  saveProducts();
+  populateCategoryFilter();
+  renderProducts();
+  renderAdminProducts();
+}
+
+/* ---------- funciones escape y helpers ---------- */
+function escape(s){ return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ---------- Render initial admin table and products (called en initPage) ---------- */
+function refreshUI(){
+  populateCategoryFilter();
+  renderProducts();
+  renderAdminProducts();
+}
+
+/* ---------- Guardar objetos iniciales si no existen ---------- */
+if(!localStorage.getItem(LS_PRODUCTS)) saveProducts();
+if(!localStorage.getItem(LS_USERS)) saveUsers();
+
+/* ---------- Mostrar welcome overlay si se inició sesión hace poco ---------- */
+(function maybeWelcome(){
+  const shownKey = 'felipestore_welcome_shown';
+  if(!localStorage.getItem(shownKey)){
+    document.getElementById('welcome-overlay').style.display='flex';
+    setTimeout(()=>{ document.getElementById('welcome-overlay').style.display='none'; localStorage.setItem(shownKey,'1'); }, 3000);
+  }
+})();
+</script>
 </body>
-</html>
+            </html>
