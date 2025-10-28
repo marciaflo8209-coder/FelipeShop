@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel | FelipeStore</title>
+  <style>
+    body {
+      background-color: #0a0f2d;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 100px;
+    }
+    .saldo {
+      background-color: #1f2a44;
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      color: #4fc3f7;
+      text-decoration: none;
+      background: #1f2a44;
+      padding: 10px 20px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bienvenido, <span id="usuario"></span> 👋</h1>
+  <div class="saldo">
+    <h2>Tu saldo actual:</h2>
+    <p id="saldo">$10.00</p>
+  </div>
+
+  <a href="index.html" id="logout">Cerrar sesión</a>
+
+  <script>
+    const usuario = localStorage.getItem("usuarioActivo");
+    const saldo = localStorage.getItem("saldo") || "10.00";
+    document.getElementById("usuario").textContent = usuario || "Invitado";
+    document.getElementById("saldo").textContent = "$" + saldo;
+
+    document.getElementById("logout").addEventListener("click", () => {
+      localStorage.removeItem("usuarioActivo");
+    });
+  </script>
+</body>
+</html>
