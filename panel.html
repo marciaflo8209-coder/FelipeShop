@@ -3,184 +3,126 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FelipeStore | Panel</title>
+  <title>Panel - FelipeStore</title>
   <style>
     body {
-      background-color: #0a0f2d;
-      color: white;
+      background-color: #0d1117;
+      color: #fff;
       font-family: Arial, sans-serif;
-      text-align: center;
       margin: 0;
       padding: 0;
+      text-align: center;
     }
     header {
-      background-color: #111a44;
-      padding: 20px;
-      font-size: 24px;
-      font-weight: bold;
+      background-color: #161b22;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
     }
-    .saldo, .owner-panel {
-      background-color: #1f2a44;
-      padding: 20px;
-      border-radius: 10px;
-      margin: 20px auto;
-      width: 90%;
-      max-width: 500px;
+    h1 {
+      color: #58a6ff;
+      font-size: 1.6em;
     }
-    input, button, select {
-      padding: 10px;
-      margin: 5px;
-      border-radius: 8px;
+    .user-info {
+      text-align: right;
+    }
+    .saldo {
+      font-size: 1.2em;
+      margin-bottom: 5px;
+    }
+    .logout-btn {
+      background-color: #f85149;
       border: none;
-      font-size: 16px;
-    }
-    button {
-      background-color: #4fc3f7;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 8px;
       cursor: pointer;
+      font-size: 0.9em;
     }
-    button:hover {
-      background-color: #039be5;
+    .productos {
+      margin: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
     }
-    a {
-      color: #4fc3f7;
-      text-decoration: none;
-      display: inline-block;
-      margin-top: 15px;
+    .producto {
+      background-color: #21262d;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.05);
     }
-    table {
+    .producto img {
       width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
+      border-radius: 8px;
     }
-    th, td {
-      border-bottom: 1px solid #4fc3f7;
-      padding: 8px;
+    .producto h3 {
+      color: #58a6ff;
+      margin: 10px 0 5px;
+    }
+    .producto p {
+      font-size: 0.9em;
+      color: #ccc;
+    }
+    .precio {
+      font-weight: bold;
+      color: #39d353;
     }
   </style>
 </head>
 <body>
-  <header>FelipeStore Panel</header>
-  
-  <div class="saldo">
-    <h2>Bienvenido, <span id="usuario"></span> 👋</h2>
-    <h3>Saldo actual: <span id="saldo"></span></h3>
-    <a href="index.html" id="logout">Cerrar sesión</a>
-  </div>
-
-  <div class="owner-panel" id="ownerPanel" style="display: none;">
-    <h2>Panel del Owner ⚙️</h2>
-
-    <div>
-      <h3>➕ Crear usuario</h3>
-      <input type="text" id="nuevoUsuario" placeholder="Usuario nuevo">
-      <input type="password" id="nuevaPass" placeholder="Contraseña">
-      <input type="number" id="saldoInicial" placeholder="Saldo inicial">
-      <button onclick="crearUsuario()">Crear</button>
+  <header>
+    <h1>FelipeStore 💰</h1>
+    <div class="user-info">
+      <div class="saldo">Saldo: <span id="saldo">$0.00</span></div>
+      <div id="usuario"></div>
+      <button class="logout-btn" onclick="logout()">Salir</button>
     </div>
+  </header>
 
-    <div>
-      <h3>💰 Gestionar saldo</h3>
-      <select id="listaUsuarios"></select>
-      <input type="number" id="monto" placeholder="Monto">
-      <button onclick="sumarSaldo()">Añadir saldo</button>
-      <button onclick="restarSaldo()">Quitar saldo</button>
-    </div>
+  <h2>🛍️ Productos disponibles</h2>
 
-    <div>
-      <h3>👥 Lista de usuarios</h3>
-      <table id="tablaUsuarios">
-        <thead><tr><th>Usuario</th><th>Saldo</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
+  <div class="productos" id="productos"></div>
 
   <script>
-    const usuarioActivo = localStorage.getItem("usuarioActivo");
-    const usuarios = JSON.parse(localStorage.getItem("usuarios")) || {
-      "FelipeOficial": { pass: "Felipe2013", saldo: 10, rol: "owner" }
-    };
+    // Verificar sesión
+    const usuario = localStorage.getItem("usuarioActivo");
+    const saldo = localStorage.getItem("saldoUsuario") || "0.00";
 
-    // Mostrar usuario y saldo
-    document.getElementById("usuario").textContent = usuarioActivo;
-    document.getElementById("saldo").textContent = "$" + usuarios[usuarioActivo].saldo.toFixed(2);
-
-    // Mostrar panel owner si es FelipeOficial
-    if (usuarios[usuarioActivo].rol === "owner") {
-      document.getElementById("ownerPanel").style.display = "block";
-      actualizarListaUsuarios();
-      actualizarTabla();
+    if (!usuario) {
+      window.location.href = "index.html";
     }
 
-    // Cerrar sesión
-    document.getElementById("logout").addEventListener("click", () => {
+    document.getElementById("usuario").innerText = usuario;
+    document.getElementById("saldo").innerText = `$${saldo}`;
+
+    function logout() {
       localStorage.removeItem("usuarioActivo");
+      window.location.href = "index.html";
+    }
+
+    // Lista de productos
+    const productos = [
+      { nombre: "Tarjeta Steam", descripcion: "Tarjeta regalo de Steam de $10", precio: 10, img: "https://via.placeholder.com/200x120?text=Steam" },
+      { nombre: "Netflix Premium", descripcion: "Cuenta 1 mes premium", precio: 6, img: "https://via.placeholder.com/200x120?text=Netflix" },
+      { nombre: "Spotify Premium", descripcion: "Cuenta 1 mes premium", precio: 5, img: "https://via.placeholder.com/200x120?text=Spotify" },
+      { nombre: "Google Play", descripcion: "Tarjeta de $15", precio: 15, img: "https://via.placeholder.com/200x120?text=Google+Play" }
+    ];
+
+    const contenedor = document.getElementById("productos");
+
+    productos.forEach(p => {
+      const div = document.createElement("div");
+      div.className = "producto";
+      div.innerHTML = `
+        <img src="${p.img}" alt="${p.nombre}">
+        <h3>${p.nombre}</h3>
+        <p>${p.descripcion}</p>
+        <p class="precio">$${p.precio.toFixed(2)}</p>
+      `;
+      contenedor.appendChild(div);
     });
-
-    // Crear nuevo usuario
-    function crearUsuario() {
-      const user = document.getElementById("nuevoUsuario").value.trim();
-      const pass = document.getElementById("nuevaPass").value.trim();
-      const saldo = parseFloat(document.getElementById("saldoInicial").value) || 0;
-      if (!user || !pass) return alert("Completa todos los campos.");
-      if (usuarios[user]) return alert("Ese usuario ya existe.");
-
-      usuarios[user] = { pass: pass, saldo: saldo, rol: "cliente" };
-      localStorage.setItem("usuarios", JSON.stringify(usuarios));
-      actualizarListaUsuarios();
-      actualizarTabla();
-      alert("Usuario creado correctamente ✅");
-    }
-
-    // Actualizar lista desplegable
-    function actualizarListaUsuarios() {
-      const lista = document.getElementById("listaUsuarios");
-      lista.innerHTML = "";
-      for (let u in usuarios) {
-        if (u !== "FelipeOficial") {
-          const option = document.createElement("option");
-          option.value = u;
-          option.textContent = u;
-          lista.appendChild(option);
-        }
-      }
-    }
-
-    // Añadir saldo
-    function sumarSaldo() {
-      const user = document.getElementById("listaUsuarios").value;
-      const monto = parseFloat(document.getElementById("monto").value);
-      if (!monto) return alert("Ingresa un monto válido.");
-      usuarios[user].saldo += monto;
-      guardarCambios();
-    }
-
-    // Quitar saldo
-    function restarSaldo() {
-      const user = document.getElementById("listaUsuarios").value;
-      const monto = parseFloat(document.getElementById("monto").value);
-      if (!monto) return alert("Ingresa un monto válido.");
-      usuarios[user].saldo -= monto;
-      guardarCambios();
-    }
-
-    // Guardar cambios
-    function guardarCambios() {
-      localStorage.setItem("usuarios", JSON.stringify(usuarios));
-      actualizarTabla();
-      alert("Saldo actualizado 💰");
-    }
-
-    // Actualizar tabla de usuarios
-    function actualizarTabla() {
-      const tbody = document.querySelector("#tablaUsuarios tbody");
-      tbody.innerHTML = "";
-      for (let u in usuarios) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${u}</td><td>$${usuarios[u].saldo.toFixed(2)}</td>`;
-        tbody.appendChild(tr);
-      }
-    }
   </script>
 </body>
 </html>
