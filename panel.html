@@ -3,50 +3,184 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel | FelipeStore</title>
+  <title>FelipeStore | Panel</title>
   <style>
     body {
       background-color: #0a0f2d;
       color: white;
       font-family: Arial, sans-serif;
       text-align: center;
-      margin-top: 100px;
+      margin: 0;
+      padding: 0;
     }
-    .saldo {
+    header {
+      background-color: #111a44;
+      padding: 20px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .saldo, .owner-panel {
       background-color: #1f2a44;
       padding: 20px;
       border-radius: 10px;
-      display: inline-block;
+      margin: 20px auto;
+      width: 90%;
+      max-width: 500px;
+    }
+    input, button, select {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+    button {
+      background-color: #4fc3f7;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #039be5;
     }
     a {
-      display: inline-block;
-      margin-top: 20px;
       color: #4fc3f7;
       text-decoration: none;
-      background: #1f2a44;
-      padding: 10px 20px;
-      border-radius: 10px;
+      display: inline-block;
+      margin-top: 15px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border-bottom: 1px solid #4fc3f7;
+      padding: 8px;
     }
   </style>
 </head>
 <body>
-  <h1>Bienvenido, <span id="usuario"></span> 👋</h1>
+  <header>FelipeStore Panel</header>
+  
   <div class="saldo">
-    <h2>Tu saldo actual:</h2>
-    <p id="saldo">$10.00</p>
+    <h2>Bienvenido, <span id="usuario"></span> 👋</h2>
+    <h3>Saldo actual: <span id="saldo"></span></h3>
+    <a href="index.html" id="logout">Cerrar sesión</a>
   </div>
 
-  <a href="index.html" id="logout">Cerrar sesión</a>
+  <div class="owner-panel" id="ownerPanel" style="display: none;">
+    <h2>Panel del Owner ⚙️</h2>
+
+    <div>
+      <h3>➕ Crear usuario</h3>
+      <input type="text" id="nuevoUsuario" placeholder="Usuario nuevo">
+      <input type="password" id="nuevaPass" placeholder="Contraseña">
+      <input type="number" id="saldoInicial" placeholder="Saldo inicial">
+      <button onclick="crearUsuario()">Crear</button>
+    </div>
+
+    <div>
+      <h3>💰 Gestionar saldo</h3>
+      <select id="listaUsuarios"></select>
+      <input type="number" id="monto" placeholder="Monto">
+      <button onclick="sumarSaldo()">Añadir saldo</button>
+      <button onclick="restarSaldo()">Quitar saldo</button>
+    </div>
+
+    <div>
+      <h3>👥 Lista de usuarios</h3>
+      <table id="tablaUsuarios">
+        <thead><tr><th>Usuario</th><th>Saldo</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
 
   <script>
-    const usuario = localStorage.getItem("usuarioActivo");
-    const saldo = localStorage.getItem("saldo") || "10.00";
-    document.getElementById("usuario").textContent = usuario || "Invitado";
-    document.getElementById("saldo").textContent = "$" + saldo;
+    const usuarioActivo = localStorage.getItem("usuarioActivo");
+    const usuarios = JSON.parse(localStorage.getItem("usuarios")) || {
+      "FelipeOficial": { pass: "Felipe2013", saldo: 10, rol: "owner" }
+    };
 
+    // Mostrar usuario y saldo
+    document.getElementById("usuario").textContent = usuarioActivo;
+    document.getElementById("saldo").textContent = "$" + usuarios[usuarioActivo].saldo.toFixed(2);
+
+    // Mostrar panel owner si es FelipeOficial
+    if (usuarios[usuarioActivo].rol === "owner") {
+      document.getElementById("ownerPanel").style.display = "block";
+      actualizarListaUsuarios();
+      actualizarTabla();
+    }
+
+    // Cerrar sesión
     document.getElementById("logout").addEventListener("click", () => {
       localStorage.removeItem("usuarioActivo");
     });
+
+    // Crear nuevo usuario
+    function crearUsuario() {
+      const user = document.getElementById("nuevoUsuario").value.trim();
+      const pass = document.getElementById("nuevaPass").value.trim();
+      const saldo = parseFloat(document.getElementById("saldoInicial").value) || 0;
+      if (!user || !pass) return alert("Completa todos los campos.");
+      if (usuarios[user]) return alert("Ese usuario ya existe.");
+
+      usuarios[user] = { pass: pass, saldo: saldo, rol: "cliente" };
+      localStorage.setItem("usuarios", JSON.stringify(usuarios));
+      actualizarListaUsuarios();
+      actualizarTabla();
+      alert("Usuario creado correctamente ✅");
+    }
+
+    // Actualizar lista desplegable
+    function actualizarListaUsuarios() {
+      const lista = document.getElementById("listaUsuarios");
+      lista.innerHTML = "";
+      for (let u in usuarios) {
+        if (u !== "FelipeOficial") {
+          const option = document.createElement("option");
+          option.value = u;
+          option.textContent = u;
+          lista.appendChild(option);
+        }
+      }
+    }
+
+    // Añadir saldo
+    function sumarSaldo() {
+      const user = document.getElementById("listaUsuarios").value;
+      const monto = parseFloat(document.getElementById("monto").value);
+      if (!monto) return alert("Ingresa un monto válido.");
+      usuarios[user].saldo += monto;
+      guardarCambios();
+    }
+
+    // Quitar saldo
+    function restarSaldo() {
+      const user = document.getElementById("listaUsuarios").value;
+      const monto = parseFloat(document.getElementById("monto").value);
+      if (!monto) return alert("Ingresa un monto válido.");
+      usuarios[user].saldo -= monto;
+      guardarCambios();
+    }
+
+    // Guardar cambios
+    function guardarCambios() {
+      localStorage.setItem("usuarios", JSON.stringify(usuarios));
+      actualizarTabla();
+      alert("Saldo actualizado 💰");
+    }
+
+    // Actualizar tabla de usuarios
+    function actualizarTabla() {
+      const tbody = document.querySelector("#tablaUsuarios tbody");
+      tbody.innerHTML = "";
+      for (let u in usuarios) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${u}</td><td>$${usuarios[u].saldo.toFixed(2)}</td>`;
+        tbody.appendChild(tr);
+      }
+    }
   </script>
 </body>
 </html>
