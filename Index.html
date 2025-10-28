@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FelipeStore</title>
+<style>
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: radial-gradient(circle at top, #030b1b, #000);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+.container {
+  background: rgba(0,0,0,0.7);
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 0 30px #00eaff;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  margin-top: 100px;
+}
+h1 {
+  color: #00eaff;
+  text-shadow: 0 0 10px #00eaff;
+}
+input {
+  width: 90%;
+  margin: 10px 0;
+  padding: 10px;
+  border: 2px solid #00eaff;
+  border-radius: 20px;
+  background: transparent;
+  color: white;
+  outline: none;
+  text-align: center;
+}
+button {
+  width: 90%;
+  padding: 10px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 20px;
+  background: #00eaff;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
+button:hover {
+  background: #00bcd4;
+}
+.hidden { display: none; }
+#dashboard {
+  max-width: 600px;
+  margin-top: 50px;
+}
+.card {
+  background: rgba(0,0,0,0.6);
+  padding: 20px;
+  margin: 10px 0;
+  border-radius: 15px;
+  box-shadow: 0 0 10px #00eaff;
+}
+.price {
+  color: #00eaff;
+  font-weight: bold;
+}
+.balance {
+  color: #00eaff;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+</style>
+</head>
+<body>
+<div id="login" class="container">
+  <h1>Iniciar Sesión</h1>
+  <input type="text" id="username" placeholder="Usuario" />
+  <input type="password" id="password" placeholder="Contraseña" />
+  <button onclick="login()">Entrar</button>
+</div>
+
+<div id="dashboard" class="hidden">
+  <h1>FelipeStore</h1>
+  <p class="balance">Saldo: $<span id="saldo">0.00</span></p>
+  <div id="productos"></div>
+  <button onclick="cerrarSesion()">Salir</button>
+</div>
+
+<script>
+// Usuarios predefinidos
+let usuarios = {
+  "FelipeOficial": { pass: "Felipe2013", saldo: 100, rol: "owner" },
+  "Cliente1": { pass: "1234", saldo: 10, rol: "cliente" },
+};
+
+// Productos
+let productos = [
+  { nombre: "Wolf 30 Day", precio: 7.00 },
+  { nombre: "VIP Premium", precio: 15.00 },
+  { nombre: "Script Especial", precio: 5.00 },
+];
+
+// Guardar datos en localStorage
+function guardarDatos() {
+  localStorage.setItem("usuarios", JSON.stringify(usuarios));
+}
+
+// Cargar datos
+function cargarDatos() {
+  let data = localStorage.getItem("usuarios");
+  if (data) usuarios = JSON.parse(data);
+}
+
+function login() {
+  cargarDatos();
+  let user = document.getElementById("username").value;
+  let pass = document.getElementById("password").value;
+  if (usuarios[user] && usuarios[user].pass === pass) {
+    localStorage.setItem("usuarioActual", user);
+    mostrarDashboard(user);
+  } else {
+    alert("Usuario o contraseña incorrectos");
+  }
+}
+
+function mostrarDashboard(user) {
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("dashboard").classList.remove("hidden");
+  document.getElementById("saldo").innerText = usuarios[user].saldo.toFixed(2);
+  renderProductos(user);
+}
+
+function renderProductos(user) {
+  let cont = document.getElementById("productos");
+  cont.innerHTML = "";
+  productos.forEach(p => {
+    let div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `<h3>${p.nombre}</h3>
+    <p class='price'>$${p.precio.toFixed(2)}</p>
+    <button onclick="comprar('${user}','${p.nombre}',${p.precio})">Comprar</button>`;
+    cont.appendChild(div);
+  });
+}
+
+function comprar(user, nombre, precio) {
+  if (usuarios[user].saldo >= precio) {
+    usuarios[user].saldo -= precio;
+    guardarDatos();
+    alert(`Has comprado ${nombre} por $${precio.toFixed(2)}`);
+    mostrarDashboard(user);
+  } else {
+    alert("Saldo insuficiente");
+  }
+}
+
+function cerrarSesion() {
+  localStorage.removeItem("usuarioActual");
+  document.getElementById("dashboard").classList.add("hidden");
+  document.getElementById("login").classList.remove("hidden");
+}
+
+window.onload = function() {
+  cargarDatos();
+  let user = localStorage.getItem("usuarioActual");
+  if (user && usuarios[user]) mostrarDashboard(user);
+};
+</script>
+</body>
+</html>
